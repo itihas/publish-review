@@ -1,0 +1,43 @@
+{
+  "nodes": {
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1752747119,
+        "narHash": "sha256-2Kp9St3Pbsmu+xMsobLcgzzUxPvZR7alVJWyuk2BAPc=",
+        "owner": "NixOs",
+        "repo": "nixpkgs",
+        "rev": "fa0ef8a6bb1651aa26c939aeb51b5f499e86b0ec",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOs",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "org-notebook": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1752745880,
+        "narHash": "sha256-aa6Q8anLmIawlcPpWxxdSLTD2QmYokRSsnA7tYzE0aE=",
+        "ref": "refs/heads/master",
+        "rev": "b7db776324fefedff7e6bbd88118a0008cde0df0",
+        "revCount": 19619,
+        "type": "git",
+        "url": "ssh://git@gitlab.com/itihas/org-notebook.git"
+      },
+      "original": {
+        "type": "git",
+        "url": "ssh://git@gitlab.com/itihas/org-notebook.git"
+      }
+    },
+    "root": {
+      "inputs": {
+        "nixpkgs": "nixpkgs",
+        "org-notebook": "org-notebook"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}

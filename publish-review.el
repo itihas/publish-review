@@ -1,3 +1,20 @@
+(require 'ox-publish)
+(require 'org-roam)
+(setq org-directory "./")
+(setq org-roam-directory org-directory)
+(setq org-roam-mode-sections
+      (list #'org-roam-backlinks-section
+            #'org-roam-reflinks-section
+            #'org-roam-unlinked-references-section
+            ))
+(setq org-publish-use-timestamps-flag nil)
+(setq org-publish-timestamp-directory "$TMPDIR")
+(setq org-roam-db-location "$TMPDIR/org-roam.db")
+(setq org-id-locations-file "$TMPDIR/org-id-locations")
+(setq org-bibtex-file  (file-name-concat org-directory "bib" "bibliography.bib"))
+(setq org-cite-global-bibliography (list org-bibtex-file))
+(setq citar-bibliography (list org-bibtex-file))
+
 (defun review-list-backlinks (node-id)
   (let ((backlinks (mapcar
 		    (lambda (n)
@@ -29,6 +46,15 @@
 
 (setq org-export-filter-parse-tree-functions '(review-filter-parse-tree))
 
+(defun review-filter-property-drawer (contents _backend info)
+  (if (plist-get info :fancy-property-drawer)
+      (and (org-string-nw-p contents)
+	   (format "<div class=\"%s\">\n%s</div>"
+		   (plist-get info :html-content-class) contents))))
+
+(setq org-export-filter-property-drawer-functions '(review-filter-property-drawer))
+
+
 (defun review-citation-export-citation (citation _style backend info)
   "Export CITATION object.
 STYLE is the expected citation style, as a pair of strings or nil.  INFO is the
@@ -54,9 +80,9 @@ export communication channel, as a property list."
 
 (setq org-cite-export-processors '((t review-citation-processor)))
 
-(setq org-publish-project-alist '(("html-export"
-				   :base-directory "~/org-notebook/public"
-				   :publishing-directory "~/repos/review"
+(setq itihas-review-publish-project-alist `(("html-export"
+				   :base-directory ,(file-name-concat org-directory "public")
+				   :publishing-directory ,(file-name-concat org-directory "out")
 				   :base-extension "org"
 				   :publishing-function org-html-publish-to-html
 				   :with-toc nil
@@ -64,6 +90,7 @@ export communication channel, as a property list."
 				   :with-backlinks t
 				   :with-latex t
 				   :with-properties t
+				   :fancy-property-drawer t
 				   :html-html5-fancy t
 				   :auto-sitemap t
 				   :sitemap-filename "archive.org"
@@ -72,8 +99,8 @@ export communication channel, as a property list."
 				   :html-head-extra "<link rel=\"stylesheet\" type=\"text/css\" href=\"https://gongzhitaao.org/orgcss/org.css\"/>"
 				   )
 				  ("images"
-				   :base-directory "~/org-notebook/public/images/"
-				   :publishing-directory "~/repos/review/images"
+				   :base-directory ,(file-name-concat org-directory "public/images/")
+				   :publishing-directory ,(file-name-concat org-directory "out/images")
 				   :base-extension "jpg\\|gif\\|png"
 				   :recursive t
 				   :publishing-function org-publish-attachment)))
