@@ -9,8 +9,8 @@
             ))
 (setq org-publish-use-timestamps-flag nil)
 (setq org-publish-timestamp-directory "$TMPDIR")
-(setq org-roam-db-location "$TMPDIR/org-roam.db")
-(setq org-id-locations-file "$TMPDIR/org-id-locations")
+(setq org-roam-db-location "./org-roam.db")
+(setq org-id-locations-file "./org-id-locations")
 (setq org-bibtex-file  (file-name-concat org-directory "bib" "bibliography.bib"))
 (setq org-cite-global-bibliography (list org-bibtex-file))
 (setq citar-bibliography (list org-bibtex-file))
@@ -104,3 +104,7 @@ export communication channel, as a property list."
 				   :base-extension "jpg\\|gif\\|png"
 				   :recursive t
 				   :publishing-function org-publish-attachment)))
+
+(defun publish-itihas-review ()
+  (org-id-update-id-locations (org-roam-list-files))
+  (org-publish-projects itihas-review-publish-project-alist))

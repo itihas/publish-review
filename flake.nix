@@ -30,7 +30,7 @@
         buildPhase = ''
           emacs --load ${
             ./publish-review.el
-          } --quick --batch --eval "(setq org-directory \"$src\")" --execute "(org-publish-projects itihas-review-publish-project-alist)"
+          } --quick --batch --eval "(setq org-directory \"$src\")" --execute "(publish-itihas-review)"
         '';
         installPhase = ''
           mkdir -p $out

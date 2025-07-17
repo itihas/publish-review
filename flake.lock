@@ -18,11 +18,11 @@
     "org-notebook": {
       "flake": false,
       "locked": {
-        "lastModified": 1752745880,
-        "narHash": "sha256-aa6Q8anLmIawlcPpWxxdSLTD2QmYokRSsnA7tYzE0aE=",
+        "lastModified": 1752773278,
+        "narHash": "sha256-4mUW78eium91DwcsK5+5ith65Vvj6VrI2HgFaRPyX9E=",
         "ref": "refs/heads/master",
-        "rev": "b7db776324fefedff7e6bbd88118a0008cde0df0",
-        "revCount": 19619,
+        "rev": "6a8230af459c4695be8de6eb367324399db5ea1a",
+        "revCount": 19661,
         "type": "git",
         "url": "ssh://git@gitlab.com/itihas/org-notebook.git"
       },
