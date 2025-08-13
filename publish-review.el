@@ -33,11 +33,9 @@
 			      :and (= type "id")
 			      ]
 		     node-id))))
-    (if backlinks
-	(org-element-create 'headline '(:title "Backlinks" :level 1 :raw-value "Backlinks")
-			    (org-element-create 'plain-list '(:type unordered)
-						backlinks))
-      (org-element-create 'paragraph nil "This node is a singleton!"))))
+    (org-element-create 'headline '(:title "Backlinks" :level 1 :raw-value "Backlinks")
+			(org-element-create 'plain-list '(:type unordered)
+					    backlinks))))
 
 (defun review-filter-parse-tree (tree _backend info)
   (if (plist-get info :with-backlinks)
