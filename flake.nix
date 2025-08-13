@@ -4,7 +4,11 @@
 
   outputs = { nixpkgs, ... }: {
     flakeModules.default = localFlake: {
-      options.publishSrc = with nixpkgs.lib; mkOption { type = types.path; };
+      options = with nixpkgs.lib; {
+        publishSrc = mkOption { type = types.path; };
+        publishTarget = mkOption { type = types.string; };
+      };
+
       config = {
         systems = [ "x86_64-linux" ];
         perSystem = { self', inputs, pkgs, system, ... }: {
@@ -14,11 +18,9 @@
             push = pkgs.writeShellScriptBin "push" ''
               rm -rf /tmp/review
               cd /tmp
-              git clone git@github.com:itihas/review --depth=1
+              git clone ${localFlake.config.publishTarget} --depth=1
               cd review
-              ${pkgs.rsync}/bin/rsync --verbose --recursive ${
-                self'.packages.site
-              }/ ./
+              ${pkgs.rsync}/bin/rsync --verbose --recursive ${self'.packages.site}/ ./
               chown -R  $USER:users .
               git status
               git config user.email "flake-deploy@localhost"
