@@ -1,40 +1,57 @@
 {
   "nodes": {
-    "nixpkgs": {
+    "flake-parts": {
+      "inputs": {
+        "nixpkgs-lib": "nixpkgs-lib"
+      },
       "locked": {
-        "lastModified": 1752747119,
-        "narHash": "sha256-2Kp9St3Pbsmu+xMsobLcgzzUxPvZR7alVJWyuk2BAPc=",
-        "owner": "NixOs",
-        "repo": "nixpkgs",
-        "rev": "fa0ef8a6bb1651aa26c939aeb51b5f499e86b0ec",
+        "lastModified": 1754487366,
+        "narHash": "sha256-pHYj8gUBapuUzKV/kN/tR3Zvqc7o6gdFB9XKXIp1SQ8=",
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "rev": "af66ad14b28a127c5c0f3bbb298218fc63528a18",
         "type": "github"
       },
       "original": {
-        "owner": "NixOs",
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1755075189,
+        "narHash": "sha256-McF0jRFBSApsKxZIhB4fMGYbPGgnjTI3l88yVwpKDkg=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "59b13b09c8ca89d18242dae892993dd3d73c1c80",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
         "repo": "nixpkgs",
         "type": "github"
       }
     },
-    "org-notebook": {
-      "flake": false,
+    "nixpkgs-lib": {
       "locked": {
-        "lastModified": 1752773278,
-        "narHash": "sha256-4mUW78eium91DwcsK5+5ith65Vvj6VrI2HgFaRPyX9E=",
-        "ref": "refs/heads/master",
-        "rev": "6a8230af459c4695be8de6eb367324399db5ea1a",
-        "revCount": 19661,
-        "type": "git",
-        "url": "ssh://git@gitlab.com/itihas/org-notebook.git"
+        "lastModified": 1753579242,
+        "narHash": "sha256-zvaMGVn14/Zz8hnp4VWT9xVnhc8vuL3TStRqwk22biA=",
+        "owner": "nix-community",
+        "repo": "nixpkgs.lib",
+        "rev": "0f36c44e01a6129be94e3ade315a5883f0228a6e",
+        "type": "github"
       },
       "original": {
-        "type": "git",
-        "url": "ssh://git@gitlab.com/itihas/org-notebook.git"
+        "owner": "nix-community",
+        "repo": "nixpkgs.lib",
+        "type": "github"
       }
     },
     "root": {
       "inputs": {
-        "nixpkgs": "nixpkgs",
-        "org-notebook": "org-notebook"
+        "flake-parts": "flake-parts",
+        "nixpkgs": "nixpkgs"
       }
     }
   },
