@@ -61,6 +61,7 @@
               installPhase = ''
                 mkdir -p $out
                 cp -R out/*.html $out/
+                cp -R out/images $out/images
               '';
             };
           };

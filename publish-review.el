@@ -133,7 +133,7 @@ export communication channel, as a property list."
 					    ("images"
 					     :base-directory ,(file-name-concat org-directory "public/images/")
 					     :publishing-directory ,(file-name-concat org-directory "out/images")
-					     :base-extension "jpg\\|gif\\|png"
+					     :base-extension "jpg\\|jpeg\\|gif\\|png"
 					     :recursive t
 					     :publishing-function org-publish-attachment)))
 
