@@ -143,7 +143,7 @@ export communication channel, as a property list."
 					    ("rss-reviewed"
 					     :base-directory ,(file-name-concat org-directory "public")
 					     :base-extension "org"
-					     :rss-image-url ,(concat publish-url "/" "home.jpg")
+					     :rss-image-url ,(file-name-concat (file-name-as-directory publish-url) "images" "home.jpg")
 					     :html-link-home ,publish-url
 					     :html-link-use-abs-url t
 					     :rss-extension "xml"
