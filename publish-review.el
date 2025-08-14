@@ -9,7 +9,7 @@
 
 
 (use-package org-roam
-  :esnure t
+  :ensure t
   :config
   (setq org-roam-directory org-directory)
   (setq org-roam-mode-sections
@@ -19,11 +19,15 @@
               ))
   (setq org-roam-db-location (file-name-concat org-directory "org-roam.db")))
 
-(use-package org-roam-bibtex)
+(use-package org-roam-bibtex
+  :ensure t)
 
 (use-package org-id
   :config
   (setq org-id-locations-file "./org-id-locations"))
+
+(use-package htmlize
+  :ensure t)
 
 (use-package citar
   :ensure t
