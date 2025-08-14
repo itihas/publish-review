@@ -1,24 +1,38 @@
 {
   inputs.nixpkgs.url = "github:NixOS/nixpkgs";
   inputs.flake-parts.url = "github:hercules-ci/flake-parts";
+  inputs.emacs-overlay.url = "github:nix-community/emacs-overlay";
 
-  outputs = { nixpkgs, ... }: {
-    flakeModules.default = localFlake: {
-      options = with nixpkgs.lib; {
+  outputs = inputs@{ ... }: {
+    flakeModules.default = { self, lib, ... }: {
+      options = with lib; {
         publishSrc = mkOption { type = types.path; };
         publishTarget = mkOption { type = types.string; };
       };
 
       config = {
         systems = [ "x86_64-linux" ];
-        perSystem = { self', inputs, pkgs, system, ... }: {
-          packages = let pkgs = nixpkgs.legacyPackages."x86_64-linux";
-          in rec {
-            default = push;
+        perSystem = { self', inputs', pkgs, system, ... }: {
+
+          devShells.default = pkgs.mkShell {
+            packages = [ self'.packages.buildEmacs ];
+            shellHook = ''
+              alias emacs="emacs --load ${./publish-review.el} --quick"
+            '';
+          };
+
+          packages = {
+            buildEmacs =
+              inputs.emacs-overlay.lib.${system}.emacsWithPackagesFromUsePackage {
+                package =
+                  inputs.emacs-overlay.packages.${system}.emacs-unstable-nox;
+                config = ./publish-review.el;
+              };
+            default = self'.packages.push;
             push = pkgs.writeShellScriptBin "push" ''
               rm -rf /tmp/review
               cd /tmp
-              git clone ${localFlake.config.publishTarget} --depth=1
+              git clone ${self.publishTarget} --depth=1
               cd review
               ${pkgs.rsync}/bin/rsync --verbose --recursive ${self'.packages.site}/ ./
               chown -R  $USER:users .
@@ -31,15 +45,13 @@
             '';
             site = pkgs.stdenv.mkDerivation {
               name = "site";
-              src = localFlake.config.publishSrc;
-              buildInputs = [
-                (pkgs.emacs-nox.pkgs.withPackages
-                  (epkgs: with epkgs; [ org citar org-roam org-roam-bibtex ]))
-              ];
+              src = self.publishSrc;
+              buildInputs = [ self'.packages.buildEmacs ];
               buildPhase = ''
+                export ORGDIR=$src
                 emacs --load ${
                   ./publish-review.el
-                } --quick --batch --eval "(setq org-directory \"$src\")" --execute "(publish-itihas-review)"
+                } --quick --batch --execute "(publish-itihas-review)"
               '';
               installPhase = ''
                 mkdir -p $out
