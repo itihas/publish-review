@@ -8,6 +8,7 @@
       options.flake = with lib; {
         publishSrc = mkOption { type = types.path; };
         publishTarget = mkOption { type = types.string; };
+        publishUrl = mkOption { type = types.string; };
       };
 
       config = {
@@ -54,13 +55,14 @@
               buildInputs = [ self'.packages.buildEmacs ];
               buildPhase = ''
                 export ORGDIR=$PWD
+                export PUBLISH_URL=${self.publishUrl}
                 emacs --load ${
                   ./publish-review.el
                 } --batch --eval "(publish-itihas-review)"
               '';
               installPhase = ''
                 mkdir -p $out
-                cp -R out/*.html $out/
+                cp -R out/*.{html,xml} $out/
                 cp -R out/images $out/images
               '';
             };

@@ -2,6 +2,7 @@
 (setq use-package-verbose t)
 (setq build-directory (or (file-name-as-directory (getenv "TMPDIR")) "/tmp/publish-review-build/"))
 (setq user-emacs-directory build-directory)
+(setq publish-url (or (getenv "PUBLISH_URL") "somewhere"))
 (use-package org
   :demand t
   :init
@@ -12,6 +13,8 @@
   (setq org-bibtex-file  (file-name-concat org-directory "bib" "bibliography.bib"))
   (setq org-cite-global-bibliography (list org-bibtex-file)))
 
+(use-package ox-rss
+  :ensure t)
 
 (use-package org-id
   :demand t
@@ -124,6 +127,7 @@ export communication channel, as a property list."
 					     :with-properties t
 					     :fancy-property-drawer t
 					     :html-html5-fancy t
+					     :prefer-user-labels t
 					     :auto-sitemap t
 					     :sitemap-filename "archive.org"
 					     :sitemap-style list
@@ -135,7 +139,20 @@ export communication channel, as a property list."
 					     :publishing-directory ,(file-name-concat org-directory "out/images")
 					     :base-extension "jpg\\|jpeg\\|gif\\|png"
 					     :recursive t
-					     :publishing-function org-publish-attachment)))
+					     :publishing-function org-publish-attachment)
+					    ("rss-reviewed"
+					     :base-directory ,(file-name-concat org-directory "public")
+					     :base-extension "org"
+					     :rss-image-url ,(concat publish-url "/" "home.jpg")
+					     :html-link-home ,publish-url
+					     :html-link-use-abs-url t
+					     :rss-extension "xml"
+					     :publishing-directory ,(file-name-concat org-directory "out")
+					     :publishing-function (org-rss-publish-to-rss)
+					     :section-numbers nil
+					     :exclude ".*"            ;; To exclude all files...
+					     :include ("reviewed-feed.org")   ;; ... except reviewed.org.
+					     :table-of-contents nil)))
 
 (defun publish-itihas-review ()
   (interactive)
