@@ -67,7 +67,6 @@
 			      :and (= type "id")
 			      ]
 		     node-id))))
-    (message "backlinks for {}: {}" node-id backlinks)
     (org-element-create 'headline '(:title "Backlinks" :level 1 :raw-value "Backlinks")
 			(org-element-create 'plain-list '(:type unordered)
 					    backlinks))))
