@@ -1,39 +1,53 @@
+(require 'use-package)
+(setq use-package-verbose t)
+(setq build-directory (or (file-name-as-directory (getenv "TMPDIR")) "/tmp/publish-review-build/"))
+(setq user-emacs-directory build-directory)
 (use-package org
-  :config
+  :demand t
+  :init
   (require 'ox-publish)
   (setq org-publish-use-timestamps-flag nil)
-  (setq org-publish-timestamp-directory (or (getenv "TMPDIR") "/tmp/publish-review-build"))
-  (if-let (orgdir (getenv "ORGDIR")) (setq org-directory orgdir))
+  (setq org-publish-timestamp-directory build-directory)
+  (setq org-directory (or (file-name-as-directory (getenv "ORGDIR")) build-directory))
   (setq org-bibtex-file  (file-name-concat org-directory "bib" "bibliography.bib"))
   (setq org-cite-global-bibliography (list org-bibtex-file)))
 
 
+(use-package org-id
+  :demand t
+  :init
+  ;; (setq org-id-locations-file (file-name-concat org-directory ".org-id-locations"))
+  ;; (setq org-id-locations-file-relative t)
+  :config
+  (org-id-update-id-locations))
+
 (use-package org-roam
   :ensure t
-  :config
+  :demand t
+  :after org-id
+  :init
   (setq org-roam-directory org-directory)
   (setq org-roam-mode-sections
 	(list #'org-roam-backlinks-section
               #'org-roam-reflinks-section
               #'org-roam-unlinked-references-section
               ))
-  (setq org-roam-db-location (file-name-concat org-directory "org-roam.db")))
+  ;; (setq org-roam-db-location (file-name-concat org-directory "org-roam.db"))
+  (setq org-roam-verbose t)
+  :config
+  (org-roam-update-org-id-locations)
+  (org-roam-db-sync))
 
 (use-package org-roam-bibtex
   :ensure t)
-
-(use-package org-id
-  :config
-  (setq org-id-locations-file "./org-id-locations"))
 
 (use-package htmlize
   :ensure t)
 
 (use-package citar
   :ensure t
-  :config
+  :init
   (setq citar-bibliography (list org-bibtex-file)))
-
 
 (defun review-list-backlinks (node-id)
   (let ((backlinks (mapcar
@@ -53,6 +67,7 @@
 			      :and (= type "id")
 			      ]
 		     node-id))))
+    (message "backlinks for {}: {}" node-id backlinks)
     (org-element-create 'headline '(:title "Backlinks" :level 1 :raw-value "Backlinks")
 			(org-element-create 'plain-list '(:type unordered)
 					    backlinks))))
@@ -125,5 +140,4 @@ export communication channel, as a property list."
 
 (defun publish-itihas-review ()
   (interactive)
-  (org-id-update-id-locations (org-roam-list-files))
   (org-publish-projects itihas-review-publish-project-alist))

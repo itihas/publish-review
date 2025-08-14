@@ -5,7 +5,7 @@
 
   outputs = inputs@{ ... }: {
     flakeModules.default = { self, lib, ... }: {
-      options = with lib; {
+      options.flake = with lib; {
         publishSrc = mkOption { type = types.path; };
         publishTarget = mkOption { type = types.string; };
       };
@@ -21,6 +21,11 @@
             '';
           };
 
+          apps.default = {
+            type = "app";
+            program = self'.packages.push;
+          };
+
           packages = {
             buildEmacs =
               inputs.emacs-overlay.lib.${system}.emacsWithPackagesFromUsePackage {
@@ -28,7 +33,7 @@
                   inputs.emacs-overlay.packages.${system}.emacs-unstable-nox;
                 config = ./publish-review.el;
               };
-            default = self'.packages.push;
+            default = self'.packages.site;
             push = pkgs.writeShellScriptBin "push" ''
               rm -rf /tmp/review
               cd /tmp
@@ -48,10 +53,10 @@
               src = self.publishSrc;
               buildInputs = [ self'.packages.buildEmacs ];
               buildPhase = ''
-                export ORGDIR=$src
+                export ORGDIR=$PWD
                 emacs --load ${
                   ./publish-review.el
-                } --quick --batch --execute "(publish-itihas-review)"
+                } --batch --eval "(publish-itihas-review)"
               '';
               installPhase = ''
                 mkdir -p $out
