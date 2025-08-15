@@ -105,15 +105,15 @@
 		    (n (org-element-put-property n :CUSTOM_ID slug)))
 	       n))
 	    ;; this bit doesn't work yet
-	    ((and (org-element-type-p n '(quote-block
-					  example-block
-					  inline-src-block
-					  paragraph))
-		  (not (org-element-property :name n)))
-	     (let* ((slug (sluggify (concat (org-element-property-inherited :ID n) " "
-					    (int-to-string (or (org-element-begin n) (random))))))
-		    (n (org-element-put-property n :name slug)))
-	       n))
+	    ;; ((and (org-element-type-p n '(quote-block
+	    ;; 				  example-block
+	    ;; 				  inline-src-block
+	    ;; 				  paragraph))
+	    ;; 	  (not (org-element-property :name n)))
+	    ;;  (let* ((slug (sluggify (concat (org-element-property-inherited :ID n) " "
+	    ;; 				    (int-to-string (or (org-element-begin n) (random))))))
+	    ;; 	    (n (org-element-put-property n :name slug)))
+	    ;;    n))
 	    (t n)))))
 
 ;; PARSE TREE FILTERS
