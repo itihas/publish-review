@@ -99,7 +99,7 @@
   """adds the `CUSTOM_ID` attribute to all headlines and inlinetasks in org, so that when `org-html--reference` is called, it has an existing ID to use instead of generating a new one every time. The anchor has to be globally unique, so what this does to try to make it that + deterministic without polluting my actual notebook with persistent IDs for _every last headline_ is similar to the `org-id-link-use-context` approach, i.e. <org-id>-<headline-slug>."""
   (org-element-map tree org-element-all-elements
     (lambda (n)
-      (if (org-element-type-p n '(headline inlinetask))
+      (if (org-element-type-p n '(headline inlinetask target quote-block example-block inline-src-block paragraph))
 	  (let* ((slug (sluggify (concat (org-element-property-inherited :ID n) " " (org-element-property :raw-value n))))
 	      (n (org-element-put-property n :CUSTOM_ID slug)))
 	    n)
