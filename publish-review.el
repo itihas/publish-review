@@ -1,6 +1,6 @@
 (require 'use-package)
 (setq use-package-verbose t)
-(setq build-directory (or (file-name-as-directory (getenv "TMPDIR")) "/tmp/publish-review-build/"))
+(setq build-directory (file-name-as-directory (or (getenv "TMPDIR") "/tmp/publish-review-build/")))
 (setq user-emacs-directory build-directory)
 (setq publish-url (or (getenv "PUBLISH_URL") "somewhere"))
 (use-package org
@@ -81,14 +81,32 @@
 
 (setq org-export-filter-parse-tree-functions '(review-filter-parse-tree))
 
-(defun review-filter-property-drawer (contents _backend info)
-  (if (plist-get info :fancy-property-drawer)
-      (and (org-string-nw-p contents)
-	   (format "<div class=\"%s\">\n%s</div>"
-		   (plist-get info :html-content-class) contents))))
+(defun drawer-function (name contents)
+  (and (org-string-nw-p contents)
+       (format "<pre class=\"%s\">\n%s</pre>" 
+	       "example"
+	       contents
+	       ;; (concat "<table>\n" (mapconcat (lambda (x)
+	       ;; 					(let*
+	       ;; 					    ((prop (s-match org-property-re x))
+	       ;; 					     (key (-third-item prop))
+	       ;; 					     (value (-fourth-item prop))
+	       ;; 					     (parsed-value (org-element-parse-secondary-string value '(link paragraph timestamp citation))))
+	       ;; 					  (format "<tr><th> %s </th><td> %s </td></tr> \n" key value)))
+	       ;; 				      (split-string contents "\n"))
+	       ;; 	       "</table>")
+	       )))
 
-(setq org-export-filter-property-drawer-functions '(review-filter-property-drawer))
+(org-export-define-derived-backend 'review-html 'html
+  :translate-alist '((property-drawer . org-html-drawer)))
 
+(defun org-review-publish-to-html (plist filename pub-dir)
+     (org-publish-org-to 'review-html filename
+			 (concat (when (> (length org-html-extension) 0) ".")
+				 (or (plist-get plist :html-extension)
+				     org-html-extension
+				     "html"))
+			 plist pub-dir))
 
 (defun review-citation-export-citation (citation _style backend info)
   "Export CITATION object.
@@ -119,13 +137,13 @@ export communication channel, as a property list."
 					     :base-directory ,(file-name-concat org-directory "public")
 					     :publishing-directory ,(file-name-concat org-directory "out")
 					     :base-extension "org"
-					     :publishing-function org-html-publish-to-html
+					     :publishing-function org-review-publish-to-html
+					     :html-format-drawer-function drawer-function
 					     :with-toc nil
 					     :with-broken-links t
 					     :with-backlinks t
 					     :with-latex t
 					     :with-properties t
-					     :fancy-property-drawer t
 					     :html-html5-fancy t
 					     :prefer-user-labels t
 					     :auto-sitemap t
