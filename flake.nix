@@ -34,12 +34,18 @@
                   inputs.emacs-overlay.packages.${system}.emacs-unstable-nox;
                 config = ./publish-review.el;
               };
+
+            target = builtins.fetchGit {
+              url = self.publishTarget;
+              ref = "master";
+            };
+
             default = self'.packages.site;
             push = pkgs.writeShellScriptBin "push" ''
+              set -x
               rm -rf /tmp/review
-              cd /tmp
-              git clone ${self.publishTarget} --depth=1
-              cd review
+              git clone ${self.publishTarget} /tmp/review --depth=1
+              cd /tmp/review
               ${pkgs.rsync}/bin/rsync --verbose --recursive ${self'.packages.site}/ ./
               chown -R  $USER:users .
               git status
@@ -48,12 +54,15 @@
               git add .
               git commit -m "flake build"
               git push
+              set +x
             '';
             site = pkgs.stdenv.mkDerivation {
               name = "site";
               src = self.publishSrc;
               buildInputs = [ self'.packages.buildEmacs ];
               buildPhase = ''
+                mkdir ./out
+                cp -R ${self'.packages.target} out
                 export ORGDIR=$PWD
                 export PUBLISH_URL=${self.publishUrl}
                 emacs --load ${

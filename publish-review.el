@@ -9,6 +9,7 @@
   (require 'ox-publish)
   (setq org-publish-use-timestamps-flag nil)
   (setq org-publish-timestamp-directory build-directory)
+  (setq org-export-timestamp-file nil)
   (setq org-directory (or (file-name-as-directory (getenv "ORGDIR")) build-directory))
   (setq org-bibtex-file  (file-name-concat org-directory "bib" "bibliography.bib"))
   (setq org-cite-global-bibliography (list org-bibtex-file)))
