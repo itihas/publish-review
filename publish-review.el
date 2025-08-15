@@ -1,3 +1,4 @@
+;; PRELUDE
 (require 'use-package)
 (setq use-package-verbose t)
 (setq build-directory (file-name-as-directory (or (getenv "TMPDIR") "/tmp/publish-review-build/")))
@@ -22,6 +23,9 @@
   :init
   ;; (setq org-id-locations-file (file-name-concat org-directory ".org-id-locations"))
   ;; (setq org-id-locations-file-relative t)
+  (setq org-id-link-to-org-use-id create-if-interactive)
+  (setq org-link-link-consider-parent-id t)
+  (setq org-id-link-use-context t)
   :config
   (org-id-update-id-locations))
 
@@ -36,7 +40,6 @@
               #'org-roam-reflinks-section
               #'org-roam-unlinked-references-section
               ))
-  ;; (setq org-roam-db-location (file-name-concat org-directory "org-roam.db"))
   (setq org-roam-verbose t)
   :config
   (org-roam-update-org-id-locations)
@@ -53,7 +56,8 @@
   :init
   (setq citar-bibliography (list org-bibtex-file)))
 
-(defun review-list-backlinks (node-id)
+;; BACKLINKS
+(defun create-backlinks-list (node-id)
   (let ((backlinks (mapcar
 		    (lambda (n)
 		      (org-element-create
@@ -75,13 +79,31 @@
 			(org-element-create 'plain-list '(:type unordered)
 					    backlinks))))
 
-(defun review-filter-parse-tree (tree _backend info)
+(defun parse-tree-add-backlinks (tree _backend info)
   (if (plist-get info :with-backlinks)
-      (org-element-adopt tree (review-list-backlinks (org-element-property :ID tree))))
+      (org-element-adopt tree (create-backlinks-list (org-element-property :ID tree))))
   tree)
 
-(setq org-export-filter-parse-tree-functions '(review-filter-parse-tree))
+;; ANCHOR IDS
+(defun sluggify (str)
+  (replace-regexp-in-string
+   "[^a-z0-9-]" ""
+   (mapconcat 'identity
+	      (cl-remove-if-not 'identity
+                             (seq-take (split-string
+					(downcase str) " ")
+				       6))
+	      "-")))
 
+(defun parse-tree-custom-ids (tree _backend info)
+  """adds the `CUSTOM_ID` attribute to all headlines and inlinetasks in org, so that when `org-html--reference` is called, it has an existing ID to use instead of generating a new one every time. The anchor has to be globally unique, so what this does to try to make it that + deterministic without polluting my actual notebook with persistent IDs for _every last headline_ is similar to the `org-id-link-use-context` approach, i.e. <org-id>-<headline-slug>."""
+  (org-element-map tree '(headline inlinetask) (lambda (n) (org-element-put-property n :CUSTOM_ID (sluggify (concat (org-element-property-inherited :ID n) " " (org-element-property :raw-value n))))) info))
+
+;; PARSE TREE FILTERS
+(setq org-export-filter-parse-tree-functions '(parse-tree-add-backlinks parse-tree-custom-ids))
+
+;; PROPERTY DRAWER PARSING
+;; Current approach to this is to change how the drawer itself is parsed, and use a drawer parsing funciton to parse the property drawer by creating a derived backend. I think I'm better off instead creating another parse tree filter to look at the properties and create the HTML elements I want more directly -- in some cases as snippets, but notably I want to turn citekeys that appear in `ROAM_REFS` into references, for which citar is probably best.
 (defun drawer-function (name contents)
   (and (org-string-nw-p contents)
        (format "<pre class=\"%s\">\n%s</pre>" 
@@ -109,6 +131,10 @@
 				     "html"))
 			 plist pub-dir))
 
+
+
+;; CITATION PARSING
+;; Registers a citation processor that creates links to notes if I have them. I want it to create links to references that I dump in a generated references section at the bottom of the page if I don't have them. The citation processor needs to cause changes to the parse tree, and I don't know what order they evaluate in, so implementation thereof will be a little bit interesting.
 (defun review-citation-export-citation (citation _style backend info)
   "Export CITATION object.
 STYLE is the expected citation style, as a pair of strings or nil.  INFO is the
@@ -134,6 +160,8 @@ export communication channel, as a property list."
 
 (setq org-cite-export-processors '((t review-citation-processor)))
 
+
+;; PUBLISH PROJECT ALIST
 (setq itihas-review-publish-project-alist `(("html-export"
 					     :base-directory ,(file-name-concat org-directory "public")
 					     :publishing-directory ,(file-name-concat org-directory "out")
@@ -144,7 +172,7 @@ export communication channel, as a property list."
 					     :with-broken-links t
 					     :with-backlinks t
 					     :with-latex t
-					     :with-properties t
+					     :with-properties '("ROAM_REF" "MTIMES")
 					     :html-html5-fancy t
 					     :prefer-user-labels t
 					     :auto-sitemap t
