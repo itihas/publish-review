@@ -99,41 +99,40 @@
   """adds the `CUSTOM_ID` attribute to all headlines and inlinetasks in org, so that when `org-html--reference` is called, it has an existing ID to use instead of generating a new one every time. The anchor has to be globally unique, so what this does to try to make it that + deterministic without polluting my actual notebook with persistent IDs for _every last headline_ is similar to the `org-id-link-use-context` approach, i.e. <org-id>-<headline-slug>."""
   (org-element-map tree org-element-all-elements
     (lambda (n)
-      (cond ((org-element-type-p n '(headline
-				     inlinetask
-				     quote-block
-				     example-block
-				     inline-src-block
-				     paragraph))
-	     (let* ((slug (sluggify (concat (org-element-property-inherited :ID n) " "
-					    (org-element-property :raw-value n))))
-		    (n (org-element-put-property n :CUSTOM_ID slug)))
-	       n))
-	    (t n)))))
+      (if (org-element-type-p n '(headline
+				  inlinetask
+				  quote-block
+				  example-block
+				  inline-src-block
+				  paragraph))
+	  (org-element-put-property
+	   n :CUSTOM_ID
+	   (sluggify (concat (org-element-property-inherited :ID n) " "
+			     (org-element-property :raw-value n))))))))
 
 ;; PARSE TREE FILTERS
 (setq org-export-filter-parse-tree-functions '(parse-tree-add-backlinks parse-tree-custom-ids))
 
 ;; PROPERTY DRAWER PARSING
 ;; Current approach to this is to change how the drawer itself is parsed, and use a drawer parsing funciton to parse the property drawer by creating a derived backend. I think I'm better off instead creating another parse tree filter to look at the properties and create the HTML elements I want more directly -- in some cases as snippets, but notably I want to turn citekeys that appear in `ROAM_REFS` into references, for which citar is probably best.
-(defun drawer-function (name contents)
-  (and (org-string-nw-p contents)
-       (format "<pre class=\"%s\">\n%s</pre>" 
-	       "example"
-	       contents
-	       ;; (concat "<table>\n" (mapconcat (lambda (x)
-	       ;; 					(let*
-	       ;; 					    ((prop (s-match org-property-re x))
-	       ;; 					     (key (-third-item prop))
-	       ;; 					     (value (-fourth-item prop))
-	       ;; 					     (parsed-value (org-element-parse-secondary-string value '(link paragraph timestamp citation))))
-	       ;; 					  (format "<tr><th> %s </th><td> %s </td></tr> \n" key value)))
-	       ;; 				      (split-string contents "\n"))
-	       ;; 	       "</table>")
-	       )))
+;; (defun drawer-function (name contents)
+;;   (and (org-string-nw-p contents)
+;;        (format "<pre class=\"%s\">\n%s</pre>" 
+;; 	       "example"
+;; 	       contents
+;; 	       ;; (concat "<table>\n" (mapconcat (lambda (x)
+;; 	       ;; 					(let*
+;; 	       ;; 					    ((prop (s-match org-property-re x))
+;; 	       ;; 					     (key (-third-item prop))
+;; 	       ;; 					     (value (-fourth-item prop))
+;; 	       ;; 					     (parsed-value (org-element-parse-secondary-string value '(link paragraph timestamp citation))))
+;; 	       ;; 					  (format "<tr><th> %s </th><td> %s </td></tr> \n" key value)))
+;; 	       ;; 				      (split-string contents "\n"))
+;; 	       ;; 	       "</table>")
+;; 	       )))
 
-(org-export-define-derived-backend 'review-html 'html
-  :translate-alist '((property-drawer . org-html-drawer)))
+;; (org-export-define-derived-backend 'review-html 'html
+;;   :translate-alist '((property-drawer . org-html-drawer)))
 
 (defun org-review-publish-to-html (plist filename pub-dir)
      (org-publish-org-to 'review-html filename
@@ -142,6 +141,10 @@
 				     org-html-extension
 				     "html"))
 			 plist pub-dir))
+
+
+;; TAGS
+
 
 
 
@@ -178,8 +181,8 @@ export communication channel, as a property list."
 					     :base-directory ,(file-name-concat org-directory "public")
 					     :publishing-directory ,(file-name-concat org-directory "out")
 					     :base-extension "org"
-					     :publishing-function org-review-publish-to-html
-					     :html-format-drawer-function drawer-function
+					     :publishing-function org-html-publish-to-html
+					     ;; :html-format-drawer-function drawer-function
 					     :with-toc nil
 					     :with-broken-links t
 					     :with-backlinks t
