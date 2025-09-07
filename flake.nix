@@ -35,11 +35,6 @@
                 config = ./publish-review.el;
               };
 
-            target = builtins.fetchGit {
-              url = self.publishTarget;
-              ref = "master";
-            };
-
             default = self'.packages.site;
             push = pkgs.writeShellScriptBin "push" ''
               set -x
@@ -62,7 +57,6 @@
               buildInputs = [ self'.packages.buildEmacs ];
               buildPhase = ''
                 mkdir ./out
-                cp -R ${self'.packages.target} out
                 export ORGDIR=$PWD
                 export PUBLISH_URL=${self.publishUrl}
                 emacs --load ${
