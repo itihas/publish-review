@@ -105,42 +105,23 @@
 				  example-block
 				  inline-src-block
 				  paragraph))
-	  (org-element-put-property
-	   n :CUSTOM_ID
-	   (sluggify (concat (org-element-property-inherited :ID n) " "
-			     (org-element-property :raw-value n))))))))
-
-;; PARSE TREE FILTERS
-(setq org-export-filter-parse-tree-functions '(parse-tree-add-backlinks parse-tree-custom-ids))
+	  (progn (org-element-put-property
+		  n :CUSTOM_ID
+		  (sluggify (concat (org-element-property-inherited :ID n) " "
+				    (org-element-property :raw-value n))))
+		 nil)))))
 
 ;; PROPERTY DRAWER PARSING
 ;; Current approach to this is to change how the drawer itself is parsed, and use a drawer parsing funciton to parse the property drawer by creating a derived backend. I think I'm better off instead creating another parse tree filter to look at the properties and create the HTML elements I want more directly -- in some cases as snippets, but notably I want to turn citekeys that appear in `ROAM_REFS` into references, for which citar is probably best.
-;; (defun drawer-function (name contents)
-;;   (and (org-string-nw-p contents)
-;;        (format "<pre class=\"%s\">\n%s</pre>" 
-;; 	       "example"
-;; 	       contents
-;; 	       ;; (concat "<table>\n" (mapconcat (lambda (x)
-;; 	       ;; 					(let*
-;; 	       ;; 					    ((prop (s-match org-property-re x))
-;; 	       ;; 					     (key (-third-item prop))
-;; 	       ;; 					     (value (-fourth-item prop))
-;; 	       ;; 					     (parsed-value (org-element-parse-secondary-string value '(link paragraph timestamp citation))))
-;; 	       ;; 					  (format "<tr><th> %s </th><td> %s </td></tr> \n" key value)))
-;; 	       ;; 				      (split-string contents "\n"))
-;; 	       ;; 	       "</table>")
-;; 	       )))
+(defun parse-tree-property-drawers (tree _backend info)
+  (org-element-map tree org-element-all-elements)
+  (lambda (n)
+    (if (org-element-type-p n '(property-drawer))
+	(org-element-create 'table '()))))
 
-;; (org-export-define-derived-backend 'review-html 'html
-;;   :translate-alist '((property-drawer . org-html-drawer)))
 
-(defun org-review-publish-to-html (plist filename pub-dir)
-     (org-publish-org-to 'review-html filename
-			 (concat (when (> (length org-html-extension) 0) ".")
-				 (or (plist-get plist :html-extension)
-				     org-html-extension
-				     "html"))
-			 plist pub-dir))
+;; PARSE TREE FILTERS
+(setq org-export-filter-parse-tree-functions '(parse-tree-add-backlinks parse-tree-custom-ids))
 
 
 ;; TAGS
