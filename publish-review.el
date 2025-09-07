@@ -163,8 +163,9 @@ export communication channel, as a property list."
 					     :publishing-directory ,(file-name-concat org-directory "out")
 					     :base-extension "org"
 					     :publishing-function org-html-publish-to-html
-					     ;; :html-format-drawer-function drawer-function
+					     :with-author nil
 					     :with-toc nil
+					     :section-numbers nil
 					     :with-broken-links t
 					     :with-backlinks t
 					     :with-latex t
