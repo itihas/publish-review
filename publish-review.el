@@ -60,8 +60,9 @@
 (use-package
   citar-org-roam
   :ensure t
-  :after citar
-  :config (citar-org-roam-mode t) (setq citar-org-roam-subdir nil))
+  :config
+  (citar-org-roam-mode t) (setq citar-org-roam-subdir nil)
+  (require 'citar-org))
 
 ;; BACKLINKS
 (defun create-backlinks-list (node-id)
@@ -136,7 +137,9 @@
 			      'item '(:bullet "- " :pre-blank 0)
 			      (pcase (car n)
 				("https"
-				 (org-element-parse-secondary-string (cadr n) '(link)))
+				 (org-element-create 'link `(:type "https" :type-explicit-p t :path ,(cadr n) :format "bracket")))
+				("http"
+				 (org-element-create 'link `(:type "http" :type-explicit-p t :path ,(cadr n) :format "bracket")))
 				("cite"
  				 (citar-format-reference (cdr n))))))
 			   (org-roam-db-query
@@ -144,10 +147,11 @@
 				     :from refs
 				     :where (= node-id $s1)]
 			    node-id))))
-    (org-element-create
-     'headline '(:title "Refs" :level 1 :raw-value "Refs")
-     (org-element-create 'plain-list '(:type unordered)
-			 refs-list))))
+    (if refs-list
+	(org-element-create
+	 'headline '(:title "Refs" :level 1 :raw-value "Refs")
+	 (org-element-create 'plain-list '(:type unordered)
+			     refs-list)))))
 
 (defun parse-tree-add-refs (tree _backend info)
   (org-element-adopt tree (create-refs-list (org-element-property :ID tree))))
