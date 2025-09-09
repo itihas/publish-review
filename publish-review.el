@@ -53,12 +53,14 @@
 
 (use-package citar
   :ensure t
-  :init
+  :demand t
+  :config
   (setq citar-bibliography (list org-bibtex-file)))
 
 (use-package
   citar-org-roam
   :ensure t
+  :after citar
   :config (citar-org-roam-mode t) (setq citar-org-roam-subdir nil))
 
 ;; BACKLINKS
