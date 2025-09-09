@@ -66,7 +66,7 @@
 			'link
 			`(:type "id" :type-explicit-p t :path ,(car n) :format "bracket")
 			(cadr n))))
-		    (org-roam-db-query
+ 		    (org-roam-db-query
 		     [:select [nodes:id nodes:title]
 			      :from links
 			      :join nodes
@@ -107,7 +107,7 @@
 				  paragraph))
 	  (progn (org-element-put-property
 		  n :CUSTOM_ID
-		  (sluggify (concat (org-element-property-inherited :ID n) " "
+		  (sluggify (concat "h" (org-element-property-inherited :ID n) " "
 				    (org-element-property :raw-value n))))
 		 nil)))))
 
@@ -120,12 +120,38 @@
 	(org-element-create 'table '()))))
 
 
+
+;; ROAM REFS
+;; Create a refs list, similarly to how we create a backlinks list. Create a parse tree filter that appends the list to the page. (we want it just below the title, but we'll figure that out later.)
+(defun create-refs-list (node-id)
+  (let ((refs-list (mapcar (lambda (n)
+			     (org-element-create
+			      'item '(:bullet "- " :pre-blank 0)
+			      (pcase (car n)
+				("https"
+				 (org-element-parse-secondary-string (cadr n) '(link)))
+				("cite"
+ 				 (citar-format-reference (cdr n))))))
+			   (org-roam-db-query
+			    [:select [type ref]
+				     :from refs
+				     :where (= node-id $s1)]
+			    node-id))))
+    (org-element-create
+     'headline '(:title "Refs" :level 1 :raw-value "Refs")
+     (org-element-create 'plain-list '(:type unordered)
+			 refs-list))))
+
+(defun parse-tree-add-refs (tree _backend info)
+  (org-element-adopt tree (create-refs-list (org-element-property :ID tree))))
+
+
 ;; PARSE TREE FILTERS
-(setq org-export-filter-parse-tree-functions '(parse-tree-add-backlinks parse-tree-custom-ids))
+(setq org-export-filter-parse-tree-functions '(parse-tree-add-refs parse-tree-add-backlinks parse-tree-custom-ids))
 
 
 ;; TAGS
-
+;; TODO
 
 
 
