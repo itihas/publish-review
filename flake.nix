@@ -29,6 +29,7 @@
           devShells.default = pkgs.mkShell {
             packages = [ self'.packages.buildEmacs ];
             shellHook = ''
+              export ORGDIR=$PWD
               alias emacs="emacs --load ${./publish-review.el} --quick"
             '';
           };
@@ -77,7 +78,7 @@
               installPhase = ''
                 mkdir -p $out
                 cp -R out/*.{html,xml} $out/
-                cp -R out/images $out/images
+                cp -R out/static $out/static
               '';
             };
           };

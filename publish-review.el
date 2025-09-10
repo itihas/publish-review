@@ -83,7 +83,7 @@
 			      :and (= type "id")
 			      ]
 		     node-id))))
-    (org-element-create 'headline '(:title "Backlinks" :level 1 :raw-value "Backlinks")
+    (org-element-create 'headline '(:title "Backlinks" :level 2 :raw-value "Backlinks")
 			(org-element-create 'plain-list '(:type unordered)
 					    backlinks))))
 
@@ -149,7 +149,7 @@
 			    node-id))))
     (if refs-list
 	(org-element-create
-	 'headline '(:title "Refs" :level 1 :raw-value "Refs")
+	 'headline '(:title "Refs" :level 2 :raw-value "Refs")
 	 (org-element-create 'plain-list '(:type unordered)
 			     refs-list)))))
 
@@ -216,12 +216,12 @@ export communication channel, as a property list."
 					     :sitemap-filename "archive.org"
 					     :sitemap-style list
 					     :sitemap-title "Archive"
-					     :html-head-extra "<link rel=\"stylesheet\" type=\"text/css\" href=\"https://gongzhitaao.org/orgcss/org.css\"/>"
+					     :html-head-extra "<link rel=\"stylesheet\" type=\"text/css\" href=\"static/styles/org.css\"/>"
 					     )
-					    ("images"
-					     :base-directory ,(file-name-concat org-directory "public/images/")
-					     :publishing-directory ,(file-name-concat org-directory "out/images")
-					     :base-extension "jpg\\|jpeg\\|gif\\|png"
+					    ("static"
+					     :base-directory ,(file-name-concat org-directory "public/static")
+					     :publishing-directory ,(file-name-concat org-directory "out/static")
+					     :base-extension any
 					     :recursive t
 					     :publishing-function org-publish-attachment)
 					    ("rss-reviewed"
