@@ -141,7 +141,7 @@
 				("http"
 				 (org-element-create 'link `(:type "http" :type-explicit-p t :path ,(cadr n) :format "bracket")))
 				("cite"
- 				 (citar-format-reference (cdr n))))))
+				 (citar-format-reference (cdr n))))))
 			   (org-roam-db-query
 			    [:select [type ref]
 				     :from refs
@@ -172,21 +172,24 @@
   "Export CITATION object.
 STYLE is the expected citation style, as a pair of strings or nil.  INFO is the
 export communication channel, as a property list."
-  (let* ((citations-as-org-links
-	  (org-cite-mapconcat
-	   (lambda (ref)
-	     (org-element-parse-secondary-string
-	      (let ((links (org-roam-db-query [:select [node-id] :from refs
-						       :where (= ref $s1)]
-					      ref)))
-		(if links (format "[[id:%s][%s]]"
-				  (caar links)
-				  ref))
-		ref)
-	      '(link)))
-	   (org-cite-get-references citation t)
-	   ", ")))
-    citations-as-org-links))
+  (org-cite-mapconcat
+   (lambda (ref)
+     (let* ((fmtd (org-cite-concat
+		   "("
+		   (or (org-cite-basic--get-author ref info) "??")
+		   " "
+                   (or (org-cite-basic--get-year ref info) "????")
+		   ")"))
+	    (links (org-roam-db-query [:select [node-id] :from refs
+					       :where (= ref $s1)]
+				      ref)))
+       (if links
+	   (org-element-create
+	    'link
+	    `(:type "id" :type-explicit-p t :path ,(caar links) :format "bracket")
+	    fmtd)
+	 (org-element-interpret-data fmtd))))
+   (org-cite-get-references citation t) ", "))
 
 (org-cite-register-processor 'review-citation-processor
   :export-citation #'review-citation-export-citation)
