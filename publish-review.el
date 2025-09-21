@@ -132,21 +132,25 @@
 ;; ROAM REFS
 ;; Create a refs list, similarly to how we create a backlinks list. Create a parse tree filter that appends the list to the page. (we want it just below the title, but we'll figure that out later.)
 (defun create-refs-list (node-id)
-  (let ((refs-list (mapcar (lambda (n)
-			     (org-element-create
-			      'item '(:bullet "- " :pre-blank 0)
-			      (pcase (car n)
-				("https"
-				 (org-element-create 'link `(:type "https" :type-explicit-p t :path ,(cadr n) :format "bracket")))
-				("http"
-				 (org-element-create 'link `(:type "http" :type-explicit-p t :path ,(cadr n) :format "bracket")))
-				("cite"
-				 (citar-format-reference (cdr n))))))
-			   (org-roam-db-query
-			    [:select [type ref]
-				     :from refs
-				     :where (= node-id $s1)]
-			    node-id))))
+  (let* ((template "${author editor:%etal} (${year issued date}) ${title}, \
+${journal journaltitle publisher container-title collection-title}, \
+${url doi pmid pmcid}.")
+	 (refs-list (mapcar (lambda (n)
+			      (org-element-create
+			       'item '(:bullet "- " :pre-blank 0)
+			       (pcase (car n)
+				 ("https"
+				  (org-element-create 'link `(:type "https" :type-explicit-p t :path ,(cadr n) :format "bracket")))
+				 ("http"
+				  (org-element-create 'link `(:type "http" :type-explicit-p t :path ,(cadr n) :format "bracket")))
+				 ("cite"
+				  (org-element-parse-secondary-string (citar-format--entry template (cadr n)) '(link))
+				  ))))
+			    (org-roam-db-query
+			     [:select [type ref]
+				      :from refs
+				      :where (= node-id $s1)]
+			     node-id))))
     (if refs-list
 	(org-element-create
 	 'headline '(:title "Refs" :level 2 :raw-value "Refs")
