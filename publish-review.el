@@ -263,6 +263,7 @@ export communication channel, as a property list."
     :sitemap-title "Archive"
     :html-head-extra "<link rel=\"stylesheet\" type=\"text/css\" href=\"static/styles/org.css\"/>"
     :html-postamble  "<script data-isso=\"https://comments.itihas.review/\"
+        data-isso-css-url=\"static/styles/isso.css\"
         src=\"https://comments.itihas.review/js/embed.min.js\"></script>
 <section id=\"isso-thread\">
 <noscript>Javascript needs to be activated to view comments.</noscript>
