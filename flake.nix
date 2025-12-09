@@ -18,8 +18,8 @@
     flakeModules.default = { self, lib, ... }: {
       options.flake = with lib; {
         publishSrc = mkOption { type = types.path; };
-        publishTarget = mkOption { type = types.string; };
-        publishUrl = mkOption { type = types.string; };
+        publishTarget = mkOption { type = types.str; };
+        publishUrl = mkOption { type = types.str; };
       };
 
       config = {
