@@ -262,6 +262,8 @@ export communication channel, as a property list."
     :sitemap-style list
     :sitemap-title "Archive"
     :html-head-extra "<link rel=\"stylesheet\" type=\"text/css\" href=\"static/styles/org.css\"/>"
+    :html-link-home "index.html"
+    :html-preamble '(("en" . "<a accesskey=\"a\" href=\"archive.html\"> Archive </a>"))
     :html-postamble  "<script data-isso=\"https://comments.itihas.review/\"
         data-isso-css-url=\"static/styles/isso.css\"
         src=\"https://comments.itihas.review/js/embed.min.js\"></script>
@@ -289,7 +291,7 @@ export communication channel, as a property list."
     :publishing-function (org-rss-publish-to-rss)
     :section-numbers nil
     :exclude ".*" ;; To exclude all files...
-    :include ("reviewed-feed.org") ;; ... except reviewed.org.
+    :include ("reviewed-feed.org" "featured.org") ;; ... except the feeds.
     :table-of-contents nil)))
 
 (defun publish-itihas-review ()
