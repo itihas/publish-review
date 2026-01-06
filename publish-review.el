@@ -39,7 +39,8 @@
  :ensure t
  :demand t
  :after org-id
- :init (setq org-roam-directory org-directory)
+ :init
+ (setq org-roam-directory org-directory)
  (setq org-roam-mode-sections
        (list
         #'org-roam-backlinks-section
@@ -118,26 +119,26 @@
 
 (defun parse-tree-custom-ids (tree _backend info)
   ""
-  "adds the `CUSTOM_ID` attribute to all headlines and inlinetasks in org, so that when `org-html--reference` is called, it has an existing ID to use instead of generating a new one every time. The anchor has to be globally unique, so what this does to try to make it that + deterministic without polluting my actual notebook with persistent IDs for _every last headline_ is similar to the `org-id-link-use-context` approach, i.e. <org-id>-<headline-slug>."
+  "adds the `CUSTOM_ID` attribute to all headlines and inlinetasks in org, so that when `org-html--reference` is called, it has an existing ID to use instead of generating a new one every time. Because of `org-9.7.35/ox-html.el#L3342`, the only option for this at present is ID-<org-id> unless I want to advise `org-html-link`. And I don't."
   ""
   (org-element-map
    tree org-element-all-elements
    (lambda (n)
-     (if (org-element-type-p
+     (cond
+      ((org-element-type-p
+        n
+        '(headline
+          inlinetask
+          quote-block
+          example-block
+          inline-src-block
+          paragraph))
+       (when-let ((id
+                   (or (org-element-property :ID n)
+                       (org-element-property :raw-value n))))
+         (org-element-put-property
           n
-          '(headline
-            inlinetask
-            quote-block
-            example-block
-            inline-src-block
-            paragraph))
-         (progn
-           (org-element-put-property
-            n
-            :CUSTOM_ID
-            (sluggify
-             (org-element-property :raw-value n)))
-           nil)))))
+          :CUSTOM_ID (concat "ID-" id))))))))
 
 ;; PROPERTY DRAWER PARSING
 ;; Current approach to this is to change how the drawer itself is parsed, and use a drawer parsing funciton to parse the property drawer by creating a derived backend. I think I'm better off instead creating another parse tree filter to look at the properties and create the HTML elements I want more directly -- in some cases as snippets, but notably I want to turn citekeys that appear in `ROAM_REFS` into references, for which citar is probably best.
@@ -196,8 +197,8 @@ ${url doi pmid pmcid}.")
 
 ;; PARSE TREE FILTERS
 (setq org-export-filter-parse-tree-functions
-      '(parse-tree-custom-ids
-        parse-tree-add-refs parse-tree-add-backlinks))
+      '(parse-tree-add-refs
+        parse-tree-add-backlinks parse-tree-custom-ids))
 
 
 ;; TAGS
@@ -261,8 +262,12 @@ export communication channel, as a property list."
     :sitemap-style list
     :sitemap-title "Archive"
     :html-head-extra "<link rel=\"stylesheet\" type=\"text/css\" href=\"static/styles/org.css\"/>"
-    :html-preamble "<a accesskey=\"a\" href=\"index.html\"> Home </a> | <a accesskey=\"a\" href=\"archive.html\"> Archive </a>"
-    :html-postamble  "<script data-isso=\"https://comments.itihas.review/\"
+    :html-preamble
+    "<div id=\"org-div-home-and-up\">
+<a accesskey=\"a\" href=\"index.html\"> Home </a> | <a accesskey=\"a\" href=\"archive.html\"> Archive </a>
+</div>"
+    :html-postamble
+    "<script data-isso=\"https://comments.itihas.review/\"
         data-isso-css-url=\"static/styles/isso.css\"
         src=\"https://comments.itihas.review/js/embed.min.js\"></script>
 <section id=\"isso-thread\">
