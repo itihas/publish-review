@@ -46,7 +46,10 @@
         #'org-roam-reflinks-section
         #'org-roam-unlinked-references-section))
  (setq org-roam-verbose t)
- :config (org-roam-update-org-id-locations) (org-roam-db-sync))
+ :config
+ (org-roam-update-org-id-locations)
+ (org-roam-db-sync)
+ (require 'org-roam-export))
 
 (use-package org-roam-bibtex :ensure t)
 
@@ -133,11 +136,7 @@
             n
             :CUSTOM_ID
             (sluggify
-             (concat
-              "h"
-              (org-element-property-inherited :ID n)
-              " "
-              (org-element-property :raw-value n))))
+             (org-element-property :raw-value n)))
            nil)))))
 
 ;; PROPERTY DRAWER PARSING
@@ -197,8 +196,8 @@ ${url doi pmid pmcid}.")
 
 ;; PARSE TREE FILTERS
 (setq org-export-filter-parse-tree-functions
-      '(parse-tree-add-refs
-        parse-tree-add-backlinks parse-tree-custom-ids))
+      '(parse-tree-custom-ids
+        parse-tree-add-refs parse-tree-add-backlinks))
 
 
 ;; TAGS
@@ -262,8 +261,7 @@ export communication channel, as a property list."
     :sitemap-style list
     :sitemap-title "Archive"
     :html-head-extra "<link rel=\"stylesheet\" type=\"text/css\" href=\"static/styles/org.css\"/>"
-    :html-link-home "index.html"
-    :html-preamble '(("en" . "<a accesskey=\"a\" href=\"archive.html\"> Archive </a>"))
+    :html-preamble "<a accesskey=\"a\" href=\"index.html\"> Home </a> | <a accesskey=\"a\" href=\"archive.html\"> Archive </a>"
     :html-postamble  "<script data-isso=\"https://comments.itihas.review/\"
         data-isso-css-url=\"static/styles/isso.css\"
         src=\"https://comments.itihas.review/js/embed.min.js\"></script>
