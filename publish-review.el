@@ -267,7 +267,9 @@ export communication channel, as a property list."
 <a accesskey=\"a\" href=\"index.html\"> Home </a> | <a accesskey=\"a\" href=\"archive.html\"> Archive </a>
 </div>"
     :html-postamble
-    "<script data-isso=\"https://comments.itihas.review/\"
+    "<script data-goatcounter=\"https://itihas.goatcounter.com/count\"
+        async src=\"//gc.zgo.at/count.js\"></script>
+<script data-isso=\"https://comments.itihas.review/\"
         data-isso-css-url=\"static/styles/isso.css\"
         src=\"https://comments.itihas.review/js/embed.min.js\"></script>
 <section id=\"isso-thread\">
