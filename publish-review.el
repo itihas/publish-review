@@ -261,7 +261,8 @@ export communication channel, as a property list."
     :sitemap-filename "archive.org"
     :sitemap-style list
     :sitemap-title "Archive"
-    :html-head-extra "<link rel=\"stylesheet\" type=\"text/css\" href=\"static/styles/org.css\"/>"
+    :html-head-extra "<link rel=\"stylesheet\" type=\"text/css\" href=\"static/styles/org.css\"/>
+<link rel=\"icon\" type=\"image/x-icon\" href=\"/static/images/favicon.svg\">"
     :html-preamble
     "<div id=\"org-div-home-and-up\">
 <a accesskey=\"a\" href=\"index.html\"> Home </a> | <a accesskey=\"a\" href=\"archive.html\"> Archive </a>
