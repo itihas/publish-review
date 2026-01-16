@@ -136,9 +136,10 @@
        (when-let ((id
                    (or (org-element-property :ID n)
                        (org-element-property :raw-value n))))
-         (org-element-put-property
-          n
-          :CUSTOM_ID (concat "ID-" id))))))))
+         (ignore				;discard the returned value
+           (org-element-put-property
+            n
+            :CUSTOM_ID (concat "ID-" id)))))))))
 
 ;; PROPERTY DRAWER PARSING
 ;; Current approach to this is to change how the drawer itself is parsed, and use a drawer parsing funciton to parse the property drawer by creating a derived backend. I think I'm better off instead creating another parse tree filter to look at the properties and create the HTML elements I want more directly -- in some cases as snippets, but notably I want to turn citekeys that appear in `ROAM_REFS` into references, for which citar is probably best.
