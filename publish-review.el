@@ -17,7 +17,20 @@
  (setq org-directory
        (or (file-name-as-directory (getenv "ORGDIR"))
            build-directory))
- (setq org-bibtex-file
+  (setq org-todo-keywords
+       (quote ((sequence "todo(t)" "working(w!)" "|" "done(d@!)")
+               (sequence
+                "|" "wait(W@/!)" "paused(p@/!)" "cancelled(c@/!)")
+               (sequence "try(y!)" "|" "yeah(Y@/!)" "nah(N!)")
+               (sequence
+                "shortlist(s)"
+                "reading(R)"
+                "rereading(r)"
+                "|"
+                "perused(P)"
+                "finishingjabbu(f)"
+                "unreleased(u)"))))
+  (setq org-bibtex-file
        (file-name-concat org-directory "bib" "bibliography.bib"))
  (setq org-cite-global-bibliography (list org-bibtex-file)))
 
