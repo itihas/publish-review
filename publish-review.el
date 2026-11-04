@@ -43,7 +43,7 @@
  :init
  ;; (setq org-id-locations-file (file-name-concat org-directory ".org-id-locations"))
  ;; (setq org-id-locations-file-relative t)
- (setq org-id-link-to-org-use-id create-if-interactive)
+ (setq org-id-link-to-org-use-id 'create-if-interactive)
  (setq org-link-link-consider-parent-id t)
  (setq org-id-link-use-context t)
  :config (org-id-update-id-locations))
