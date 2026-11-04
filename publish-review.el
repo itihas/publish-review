@@ -11,6 +11,7 @@
  :demand t
  :init
  (require 'ox-publish)
+ (require 'url-parse)
  (setq org-publish-use-timestamps-flag nil)
  (setq org-publish-timestamp-directory build-directory)
  (setq org-export-timestamp-file nil)
@@ -242,13 +243,20 @@ ${url doi pmid pmcid}.")
           ((< n 16) '("🌿" . "budding"))
           (t '("🌳" . "evergreen")))))
 
+(defun crosspost-site (url)
+  "Site name for URL: the domain label before the TLD, e.g. substack for x.substack.com."
+  (let* ((host (or (url-host (url-generic-parse-url url)) url))
+         (labels (split-string host "\\." t)))
+    (if (cdr labels) (car (last labels 2)) host)))
+
 (defun create-page-meta (tree info)
   (let ((tags (plist-get info :filetags))
         (stamps (mtime-timestamps (org-element-property :MTIME tree)))
         ;; only notes (with an ID) get a stage, so generated pages like the sitemap don't
         (stage (and (org-element-property :ID tree)
-                    (review-score-stage (org-element-property :REVIEW_SCORE tree)))))
-    (when (or tags stamps stage)
+                    (review-score-stage (org-element-property :REVIEW_SCORE tree))))
+        (crossposts (split-string (or (org-element-property :CROSSPOSTS tree) "") nil t)))
+    (when (or tags stamps stage crossposts)
       (org-element-create
        'export-block
        `(:type
@@ -273,6 +281,14 @@ ${url doi pmid pmcid}.")
                       (lambda (s)
                         (format "<time datetime=\"%s\">%s</time>" (car s) (cdr s)))
                       stamps ", ")))
+           (when crossposts
+             (format "<span class=\"page-crossposts\">crossposted: %s</span>\n"
+                     (mapconcat
+                      (lambda (url)
+                        (format "<a href=\"%s\">%s</a>"
+                                (org-html-encode-plain-text url)
+                                (org-html-encode-plain-text (crosspost-site url))))
+                      crossposts ", ")))
            "</div>\n"))))))
 
 (defun parse-tree-add-page-meta (tree _backend info)
