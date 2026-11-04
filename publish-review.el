@@ -211,12 +211,61 @@ ${url doi pmid pmcid}.")
 
 ;; PARSE TREE FILTERS
 (setq org-export-filter-parse-tree-functions
-      '(parse-tree-add-refs
+      '(parse-tree-add-page-meta
+        parse-tree-add-refs
         parse-tree-add-backlinks parse-tree-custom-ids))
 
 
-;; TAGS
-;; TODO
+;; TAGS AND MTIMES
+;; File-level filetags and MTIME timestamps, shown as a meta line just below the title. Headline tags are already exported by ox-html.
+(defun mtime-timestamps (mtime)
+  "All timestamps in the MTIME property string, in order, as (DATETIME . TEXT)."
+  (let ((pos 0)
+        stamps)
+    (while (and mtime
+                (string-match "\\[\\(\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}\\)[^]0-9]*\\([0-9]\\{2\\}:[0-9]\\{2\\}\\)?[^]]*\\)\\]" mtime pos))
+      (push (cons (concat (match-string 2 mtime)
+                          (when (match-string 3 mtime)
+                            (concat "T" (match-string 3 mtime))))
+                  (match-string 1 mtime))
+            stamps)
+      (setq pos (match-end 0)))
+    (nreverse stamps)))
+
+(defun create-page-meta (tree info)
+  (let ((tags (plist-get info :filetags))
+        (stamps (mtime-timestamps (org-element-property :MTIME tree))))
+    (when (or tags stamps)
+      (org-element-create
+       'export-block
+       `(:type
+         "HTML"
+         :value
+         ,(concat
+           "<div class=\"page-meta\">\n"
+           (when tags
+             (format "<span class=\"page-tags\">%s</span>\n"
+                     (mapconcat
+                      (lambda (tag)
+                        (let ((tag (org-html-encode-plain-text tag)))
+                          (format "<span class=\"tag\"><span class=\"%s\">%s</span></span>"
+                                  tag tag)))
+                      tags " ")))
+           (when stamps
+             (format "<span class=\"page-mtimes\">updated: %s</span>\n"
+                     (mapconcat
+                      (lambda (s)
+                        (format "<time datetime=\"%s\">%s</time>" (car s) (cdr s)))
+                      stamps ", ")))
+           "</div>\n"))))))
+
+(defun parse-tree-add-page-meta (tree _backend info)
+  (when (plist-get info :with-page-meta)
+    (when-let ((meta (create-page-meta tree info)))
+      (if-let ((first (car (org-element-contents tree))))
+          (org-element-insert-before meta first)
+        (org-element-adopt tree meta))))
+  tree)
 
 
 ;; CITATION PARSING
@@ -267,8 +316,8 @@ export communication channel, as a property list."
     :section-numbers nil
     :with-broken-links t
     :with-backlinks t
+    :with-page-meta t
     :with-latex t
-    :with-properties '("ROAM_REF" "MTIMES")
     :html-html5-fancy t
     :prefer-user-labels t
     :auto-sitemap t
