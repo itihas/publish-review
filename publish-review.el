@@ -232,10 +232,23 @@ ${url doi pmid pmcid}.")
       (setq pos (match-end 0)))
     (nreverse stamps)))
 
+;; Garden stage from REVIEW_SCORE, which decays: tiny nonzero scores were tended once and have gone fallow.
+(defun review-score-stage (score)
+  "(EMOJI . NAME) for the REVIEW_SCORE property string; nil or zero is a seed."
+  (let ((n (if score (string-to-number score) 0)))
+    (cond ((<= n 0) '("🌰" . "seed"))
+          ((< n 1) '("🍂" . "fallow"))
+          ((< n 4) '("🌱" . "seedling"))
+          ((< n 16) '("🌿" . "budding"))
+          (t '("🌳" . "evergreen")))))
+
 (defun create-page-meta (tree info)
   (let ((tags (plist-get info :filetags))
-        (stamps (mtime-timestamps (org-element-property :MTIME tree))))
-    (when (or tags stamps)
+        (stamps (mtime-timestamps (org-element-property :MTIME tree)))
+        ;; only notes (with an ID) get a stage, so generated pages like the sitemap don't
+        (stage (and (org-element-property :ID tree)
+                    (review-score-stage (org-element-property :REVIEW_SCORE tree)))))
+    (when (or tags stamps stage)
       (org-element-create
        'export-block
        `(:type
@@ -243,6 +256,9 @@ ${url doi pmid pmcid}.")
          :value
          ,(concat
            "<div class=\"page-meta\">\n"
+           (when stage
+             (format "<span class=\"page-stage score-%s\" title=\"%s\" role=\"img\" aria-label=\"%s\">%s</span>\n"
+                     (cdr stage) (cdr stage) (cdr stage) (car stage)))
            (when tags
              (format "<span class=\"page-tags\">%s</span>\n"
                      (mapconcat
