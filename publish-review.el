@@ -235,13 +235,16 @@ ${url doi pmid pmcid}.")
 
 ;; Garden stage from REVIEW_SCORE, which decays: tiny nonzero scores were tended once and have gone fallow.
 (defun review-score-stage (score)
-  "(EMOJI . NAME) for the REVIEW_SCORE property string; nil or zero is a seed."
+  "(EMOJI NAME SHOWN) for the REVIEW_SCORE property string; nil or zero is a seed.
+SHOWN is the score rounded down, or \"<1\" when fallow."
   (let ((n (if score (string-to-number score) 0)))
-    (cond ((<= n 0) '("🌰" . "seed"))
-          ((< n 1) '("🍂" . "fallow"))
-          ((< n 4) '("🌱" . "seedling"))
-          ((< n 16) '("🌿" . "budding"))
-          (t '("🌳" . "evergreen")))))
+    (cond ((<= n 0) '("🌰" "seed" "0"))
+          ((< n 1) '("🍂" "fallow" "<1"))
+          (t (append
+              (cond ((< n 4) '("🌱" "seedling"))
+                    ((< n 16) '("🌿" "budding"))
+                    (t '("🌳" "evergreen")))
+              (list (number-to-string (floor n))))))))
 
 (defun crosspost-site (url)
   "Site name for URL: the domain label before the TLD, e.g. substack for x.substack.com."
@@ -265,10 +268,11 @@ ${url doi pmid pmcid}.")
          ,(concat
            "<div class=\"page-meta\">\n"
            (when stage
-             (format "<span class=\"page-stage score-%s\" title=\"%s\" role=\"img\" aria-label=\"%s\">%s</span>\n"
-                     (cdr stage) (cdr stage) (cdr stage) (car stage)))
+             (pcase-let ((`(,emoji ,name ,shown) stage))
+               (format "<span class=\"page-stage score-%s\" title=\"review score: %s\" role=\"img\" aria-label=\"%s\">%s</span>\n"
+                       name (org-html-encode-plain-text shown) name emoji)))
            (when tags
-             (format "<span class=\"page-tags\">%s</span>\n"
+             (format "<span class=\"page-tags\">tags: %s</span>\n"
                      (mapconcat
                       (lambda (tag)
                         (let ((tag (org-html-encode-plain-text tag)))
